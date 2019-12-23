@@ -1,6 +1,6 @@
 --
 --
---  there (v0.1)
+--  there (v0.2)
 --  a min
 --  @infovore
 --
@@ -8,8 +8,9 @@
 --  E2: pitch
 --  E3: volume
 --
---  K2:
---  K3:
+--  there's some crispy 
+--  distortion at the 
+--  highest volumes
 --
 
 engine.name = "TestSine"
