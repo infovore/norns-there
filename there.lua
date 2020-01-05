@@ -1,12 +1,15 @@
 --
 --
---  there (v0.2)
+--  there (v0.3)
 --  a min
 --  @infovore
 --
 --
 --  E2: pitch
 --  E3: volume
+--
+--  K2: coarse control (hold)
+--  K3: fine control (hold)
 --
 --  there's some crispy 
 --  distortion at the 
@@ -17,6 +20,8 @@ engine.name = "TestSine"
 
 minhz = 40
 maxhz = 2000
+hz_scalar = 0.5
+hz_hand_height = 32
 
 params:add_control("hz","pitch",controlspec.new(40,2000,'exp',0,440,'hz'))
 params:add_control("amp","volume",controlspec.new(0,1.0,'lin',0,0,''))
@@ -42,16 +47,29 @@ end
 
 function key(n,z)
   if n == 2 then
-    -- down
+    if z == 1 then
+      hz_scalar = 2
+      hz_hand_height = 48
+    else
+      hz_scalar = 0.5
+      hz_hand_height = 32
+    end
   elseif n == 3 then
     -- up
+    if z == 1 then
+      hz_scalar = 0.25 
+      hz_hand_height = 24
+    else
+      hz_scalar = 0.5
+      hz_hand_height = 32
+    end
   end
 end
 
 function enc(n,d)
   if n == 2 then
     -- pitch
-    params:delta("hz", d/2)
+    params:delta("hz", d * hz_scalar)
   elseif n == 3 then
     -- vol
     params:delta("amp", d)
@@ -94,7 +112,7 @@ end
 
 function draw_hz_hand()
   screen.level(12)
-  screen.rect(hz_to_x_pos(),32,2, 7)
+  screen.rect(hz_to_x_pos(),hz_hand_height,2, 7)
   screen.stroke()
   screen.move(32,15)
   screen.text_center(math.floor(params:get('hz')))
