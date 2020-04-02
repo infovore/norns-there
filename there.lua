@@ -1,6 +1,6 @@
 --
 --
---  there (v0.3)
+--  there (v0.4)
 --  a min
 --  @infovore
 --
@@ -15,13 +15,16 @@
 --  distortion at the 
 --  highest volumes
 --
+-- also works with arc
 
 engine.name = "TestSine"
 
-minhz = 40
-maxhz = 2000
-hz_scalar = 0.5
-hz_hand_height = 32
+local minhz = 40
+local maxhz = 2000
+local hz_scalar = 0.5
+local hz_hand_height = 32
+
+local a = arc.connect(1)
 
 params:add_control("hz","pitch",controlspec.new(40,2000,'exp',0,440,'hz'))
 params:add_control("amp","volume",controlspec.new(0,1.0,'lin',0,0,''))
@@ -42,6 +45,7 @@ function redraw()
   draw_theremin()
   draw_amp_hand()
   draw_hz_hand()
+  arc_redraw()
   screen.update()
 end
 
@@ -76,6 +80,16 @@ function enc(n,d)
   end
 end
 
+function a.delta(n,d)
+  if n == 1 then
+    -- pitch
+    params:delta("hz", d * hz_scalar)
+  elseif n == 2 then
+    -- vol
+    params:delta("amp", d)
+  end
+end
+
 function hz_to_x_pos()
   -- take hz, spit out x pos for hand
   min_pos =10 
@@ -90,6 +104,24 @@ function amp_to_y_pos()
   max_pos = 22
 
   return util.linlin(0,1,min_pos,max_pos,params:get('amp'))
+end
+
+function arc_redraw()
+  local full_circle = (2*math.pi)-0.01
+  
+  local arc_pos = math.floor(util.explin(minhz,maxhz,1,43,params:get('hz')))
+  
+  arc_pos = arc_pos - 21;
+  if arc_pos < 0 then
+    arc_pos = 64 + arc_pos
+  end
+
+  local amp_intensity =  math.floor(params:get('amp') * 15)
+  
+  a:all(0)
+  a:led(1,arc_pos,10)
+  a:segment(2,0,full_circle,amp_intensity)
+  a:refresh()
 end
 
 function draw_theremin()
